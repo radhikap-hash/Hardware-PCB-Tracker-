@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{
+    --bg:#F6F7F8; --card:#FFFFFF; --sunk:#F1F3F5;
+    --ink:#15181B; --mid:#5A6169; --dim:#8A9199; --line:#E4E7EA;
+    --ok:#0F7A52; --late:#C4302B; --hold:#B54708; --wip:#A76A08; --idle:#8A9199;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#111315;--card:#1A1D20;--sunk:#212528;--ink:#ECEEF0;--mid:#A5ACB3;
+          --dim:#767D84;--line:#2C3135;--ok:#3FBE88;--late:#F2726D;
+          --hold:#E08A45;--wip:#DDA83A;--idle:#767D84;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 56px}
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+         flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:19px;font-weight:600;margin:0;letter-spacing:-0.01em}
+  .stamp{font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+        gap:10px;margin-bottom:20px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .kpi span{display:block;font-size:12px;color:var(--mid);margin-bottom:5px}
+  .kpi b{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-0.02em}
+  .bar{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  input[type=search]{flex:1;min-width:180px;height:36px;padding:0 12px;font-size:14px;
+    font-family:var(--sans);color:var(--ink);background:var(--card);
+    border:1px solid var(--line);border-radius:8px;outline:none}
+  input[type=search]:focus{border-color:var(--mid)}
+  .hint{font-size:12px;color:var(--dim)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .client{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;
+          border-bottom:1px solid var(--line);user-select:none}
+  .client:hover{background:var(--sunk)}
+  .client:last-child{border-bottom:none}
+  .caret{font-family:var(--mono);font-size:11px;color:var(--dim);width:10px;
+         transition:transform .15s ease}
+  .open .caret{transform:rotate(90deg)}
+  .cname{flex:1;font-weight:600;font-size:14px}
+  .dots{display:flex;gap:4px}
+  .dot{width:7px;height:7px;border-radius:50%}
+  .csum{font-size:12px;color:var(--dim);font-family:var(--mono)}
+  .head,.board{display:flex;gap:10px;align-items:center;padding:8px 14px 8px 34px;
+               border-bottom:1px solid var(--line)}
+  .head{background:var(--sunk);font-size:11px;color:var(--dim);
+        text-transform:uppercase;letter-spacing:.05em}
+  .board{cursor:pointer;font-size:13px}
+  .board:hover{background:var(--sunk)}
+  .c-name{width:168px;flex-shrink:0;font-family:var(--mono);font-size:12px;
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .c-stage{width:96px;flex-shrink:0;color:var(--mid);font-size:12px}
+  .c-state{width:104px;flex-shrink:0}
+  .c-note{flex:1;min-width:0;color:var(--mid);font-size:12px;
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;
+       border-radius:999px;white-space:nowrap}
+  .detail{padding:13px 16px 16px 34px;background:var(--sunk);
+          border-bottom:1px solid var(--line);display:grid;
+          grid-template-columns:92px 1fr;gap:7px 14px;font-size:12.5px}
+  .dk{color:var(--dim)}
+  .rail{display:flex;gap:5px;flex-wrap:wrap}
+  .step{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--card);
+        border:1px solid var(--line);color:var(--mid);font-family:var(--mono)}
+  .step.hit{border-color:var(--ok);color:var(--ok)}
+  .empty{padding:40px 20px;text-align:center;color:var(--dim);font-size:13px}
+  @media(max-width:640px){
+    .c-name{width:120px}.c-stage{display:none}.c-state{width:92px}
+    .head .c-note,.board .c-note{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>PCB design status</h1>
+    <div class="stamp" id="stamp">loading…</div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="Search a board or client">
+    <span class="hint">Tap a client, then a board</span>
+  </div>
+
+  <div class="panel" id="panel"><div class="empty">Reading the sheet…</div></div>
+</div>
+
+<script>
+var COLOR = {Completed:'var(--ok)', 'On hold':'var(--hold)', 'In progress':'var(--wip)',
+             'Not started':'var(--idle)'};
+var STAGES = ['Upcoming','Schematic','PCB-Design','SI&PI','Assembly'];
+var DATA = null, OPEN = {}, QUERY = '';
+
+function colorOf(state){
+  if (state.indexOf('Delayed') === 0) return 'var(--late)';
+  return COLOR[state] || 'var(--idle)';
+}
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+
+function kpis(d){
+  var cells = [['Boards tracked', d.total, 'var(--ink)'],
+               ['Completed', d.completed, 'var(--ok)'],
+               ['Delayed', d.delayed, 'var(--late)'],
+               ['On hold', d.onHold, 'var(--hold)'],
+               ['In progress', d.inProgress, 'var(--wip)'],
+               ['Fields missing', d.gaps, 'var(--dim)']];
+  document.getElementById('kpis').innerHTML = cells.map(function(c){
+    return '<div class="kpi"><span>' + c[0] + '</span><b style="color:' + c[2] + '">' + c[1] + '</b></div>';
+  }).join('');
+}
+
+function matches(client){
+  if (!QUERY) return client.boards;
+  var q = QUERY.toLowerCase();
+  if (client.name.toLowerCase().indexOf(q) > -1) return client.boards;
+  return client.boards.filter(function(b){
+    return b.name.toLowerCase().indexOf(q) > -1 ||
+           (b.comments || '').toLowerCase().indexOf(q) > -1;
+  });
+}
+
+function render(){
+  if (!DATA) return;
+  var panel = document.getElementById('panel'), html = '';
+
+  DATA.clients.forEach(function(cl, i){
+    var boards = matches(cl);
+    if (!boards.length) return;
+
+    var seen = {}, dots = '';
+    boards.forEach(function(b){
+      var c = colorOf(b.state);
+      if (!seen[c]) { seen[c] = 1; dots += '<span class="dot" style="background:' + c + '"></span>'; }
+    });
+
+    var sum = cl.delayed
+      ? '<span style="color:var(--late)">' + cl.delayed + ' delayed</span>'
+      : cl.done + ' done';
+
+    html += '<div class="client' + (OPEN[i] ? ' open' : '') + '" data-i="' + i + '">' +
+              '<span class="caret">&#9654;</span>' +
+              '<span class="cname">' + esc(cl.name) + '</span>' +
+              '<span class="dots">' + dots + '</span>' +
+              '<span class="csum">' + boards.length + ' boards &middot; ' + sum + '</span>' +
+            '</div>';
+
+    if (OPEN[i]) {
+      html += '<div class="head"><span class="c-name">Board</span>' +
+              '<span class="c-stage">Stage</span><span class="c-state">Status</span>' +
+              '<span class="c-note">Comments</span></div>';
+      boards.forEach(function(b, j){
+        var c = colorOf(b.state);
+        html += '<div class="board" data-i="' + i + '" data-j="' + j + '">' +
+                  '<span class="c-name">' + esc(b.name) + '</span>' +
+                  '<span class="c-stage">' + esc(b.stage) + '</span>' +
+                  '<span class="c-state"><span class="tag" style="background:' + c +
+                    '1F;color:' + c + '">' + esc(b.state) + '</span></span>' +
+                  '<span class="c-note">' + esc(b.comments || '—') + '</span>' +
+                '</div>' +
+                '<div id="d' + i + '-' + j + '"></div>';
+      });
+    }
+  });
+
+  panel.innerHTML = html || '<div class="empty">Nothing matches that search.</div>';
+
+  panel.querySelectorAll('.client').forEach(function(el){
+    el.onclick = function(){ var i = el.dataset.i; OPEN[i] = !OPEN[i]; render(); };
+  });
+
+  panel.querySelectorAll('.board').forEach(function(el){
+    el.onclick = function(){
+      var i = el.dataset.i, j = el.dataset.j;
+      var slot = document.getElementById('d' + i + '-' + j);
+      if (slot.innerHTML) { slot.innerHTML = ''; return; }
+      var b = matches(DATA.clients[i])[j], c = colorOf(b.state);
+      var rail = STAGES.map(function(s){
+        return '<span class="step' + (b.stages.indexOf(s) > -1 ? ' hit' : '') + '">' + s + '</span>';
+      }).join('');
+      slot.className = 'detail';
+      slot.innerHTML =
+        '<span class="dk">Stage</span><span>' + esc(b.stage) + '</span>' +
+        '<span class="dk">Status</span><span style="color:' + c + ';font-weight:600">' +
+          esc(b.state) + (b.delay > 0 ? ' — past target of ' + esc(b.target) : '') + '</span>' +
+        '<span class="dk">Comments</span><span>' + esc(b.comments || 'None entered') + '</span>' +
+        '<span class="dk">Owner</span><span>' + esc(b.owner) + '</span>' +
+        '<span class="dk">Manager</span><span>' + esc(b.manager || '—') + '</span>' +
+        '<span class="dk">Start</span><span>' + esc(b.start || '—') + '</span>' +
+        '<span class="dk">Target</span><span>' + esc(b.target || 'not set') + '</span>' +
+        '<span class="dk">Progress</span><span>' + (b.pct === null ? '—' : b.pct + '%') + '</span>' +
+        '<span class="dk">On file in</span><span class="rail">' + rail + '</span>';
+    };
+  });
+}
+
+function load(){
+  google.script.run
+    .withSuccessHandler(function(d){
+      DATA = d;
+      document.getElementById('stamp').textContent = 'updated ' + d.refreshed;
+      kpis(d);
+      render();
+    })
+    .withFailureHandler(function(err){
+      document.getElementById('panel').innerHTML =
+        '<div class="empty">Couldn\'t read the sheet: ' + esc(err.message) + '</div>';
+    })
+    .getDashboardData();
+}
+
+document.getElementById('q').addEventListener('input', function(e){
+  QUERY = e.target.value.trim();
+  render();
+});
+
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>
