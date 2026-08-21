@@ -1,79 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<base target="_top">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PCB design status</title>
 <style>
-  :root{
-    --bg:#F6F7F8; --card:#FFFFFF; --sunk:#F1F3F5;
-    --ink:#15181B; --mid:#5A6169; --dim:#8A9199; --line:#E4E7EA;
-    --ok:#0F7A52; --late:#C4302B; --hold:#B54708; --wip:#A76A08; --idle:#8A9199;
+  :root{--bg:#F6F7F8;--card:#fff;--sunk:#F1F3F5;--ink:#15181B;--mid:#5A6169;
+    --dim:#8A9199;--line:#E4E7EA;--ok:#0F7A52;--late:#C4302B;--hold:#B54708;
+    --wip:#A76A08;--idle:#8A9199;
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  }
-  @media (prefers-color-scheme:dark){
-    :root{--bg:#111315;--card:#1A1D20;--sunk:#212528;--ink:#ECEEF0;--mid:#A5ACB3;
-          --dim:#767D84;--line:#2C3135;--ok:#3FBE88;--late:#F2726D;
-          --hold:#E08A45;--wip:#DDA83A;--idle:#767D84;}
-  }
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  @media(prefers-color-scheme:dark){:root{--bg:#111315;--card:#1A1D20;--sunk:#212528;
+    --ink:#ECEEF0;--mid:#A5ACB3;--dim:#767D84;--line:#2C3135;--ok:#3FBE88;
+    --late:#F2726D;--hold:#E08A45;--wip:#DDA83A;}}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
-       font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 56px}
-  header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
-         flex-wrap:wrap;margin-bottom:18px}
-  h1{font-size:19px;font-weight:600;margin:0;letter-spacing:-0.01em}
-  .stamp{font-family:var(--mono);font-size:11px;color:var(--dim)}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
-        gap:10px;margin-bottom:20px}
+  header{display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:20px;font-weight:600;margin:0}
+  .stamp{font-size:12px;color:var(--dim);font-family:var(--mono)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:10px;margin-bottom:20px}
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
-  .kpi span{display:block;font-size:12px;color:var(--mid);margin-bottom:5px}
-  .kpi b{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-0.02em}
+  .kpi span{display:block;font-size:13px;color:var(--mid);margin-bottom:5px}
+  .kpi b{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-0.02em}
   .bar{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-  input[type=search]{flex:1;min-width:180px;height:36px;padding:0 12px;font-size:14px;
+  input[type=search]{flex:1;min-width:180px;height:38px;padding:0 12px;font-size:15px;
     font-family:var(--sans);color:var(--ink);background:var(--card);
     border:1px solid var(--line);border-radius:8px;outline:none}
   input[type=search]:focus{border-color:var(--mid)}
-  .hint{font-size:12px;color:var(--dim)}
+  .hint{font-size:13px;color:var(--dim)}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .client{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;
-          border-bottom:1px solid var(--line);user-select:none}
+  .client{display:flex;align-items:center;gap:11px;padding:14px;cursor:pointer;
+    border-bottom:1px solid var(--line);user-select:none}
   .client:hover{background:var(--sunk)}
-  .client:last-child{border-bottom:none}
-  .caret{font-family:var(--mono);font-size:11px;color:var(--dim);width:10px;
-         transition:transform .15s ease}
+  .caret{font-size:11px;color:var(--dim);width:10px;transition:transform .15s ease}
   .open .caret{transform:rotate(90deg)}
-  .cname{flex:1;font-weight:600;font-size:14px}
+  .cname{flex:1;font-weight:600;font-size:15px}
   .dots{display:flex;gap:4px}
-  .dot{width:7px;height:7px;border-radius:50%}
-  .csum{font-size:12px;color:var(--dim);font-family:var(--mono)}
-  .head,.board{display:flex;gap:10px;align-items:center;padding:8px 14px 8px 34px;
-               border-bottom:1px solid var(--line)}
-  .head{background:var(--sunk);font-size:11px;color:var(--dim);
-        text-transform:uppercase;letter-spacing:.05em}
-  .board{cursor:pointer;font-size:13px}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .csum{font-size:13px;color:var(--dim);font-family:var(--mono)}
+  .head,.board{display:flex;gap:10px;align-items:center;
+    padding:9px 14px 9px 34px;border-bottom:1px solid var(--line)}
+  .head{background:var(--sunk);font-size:12px;color:var(--dim);
+    text-transform:uppercase;letter-spacing:.05em}
+  .board{cursor:pointer;font-size:14px}
   .board:hover{background:var(--sunk)}
-  .c-note{flex:1;min-width:0;color:var(--mid);font-size:12px;
-          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .c-stage{width:96px;flex-shrink:0;color:var(--mid);font-size:12px}
-  .c-state{width:104px;flex-shrink:0}
-  .c-note{flex:1;min-width:0;color:var(--mid);font-size:12px;
-          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;
-       border-radius:999px;white-space:nowrap}
-  .detail{padding:13px 16px 16px 34px;background:var(--sunk);
-          border-bottom:1px solid var(--line);display:grid;
-          grid-template-columns:92px 1fr;gap:7px 14px;font-size:12.5px}
+  .c-name{width:220px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .c-stage{width:100px;flex-shrink:0;color:var(--mid);font-size:14px}
+  .c-state{width:120px;flex-shrink:0}
+  .c-note{flex:1;min-width:0;color:var(--mid);font-size:14px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;
+    border-radius:999px;white-space:nowrap}
+  .detail{padding:14px 16px 16px 34px;background:var(--sunk);
+    border-bottom:1px solid var(--line);display:grid;
+    grid-template-columns:100px 1fr;gap:8px 14px;font-size:14px}
   .dk{color:var(--dim)}
   .rail{display:flex;gap:5px;flex-wrap:wrap}
-  .step{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--card);
-        border:1px solid var(--line);color:var(--mid);font-family:var(--mono)}
+  .step{font-size:12px;padding:3px 9px;border-radius:4px;background:var(--card);
+    border:1px solid var(--line);color:var(--mid);font-family:var(--mono)}
   .step.hit{border-color:var(--ok);color:var(--ok)}
-  .empty{padding:40px 20px;text-align:center;color:var(--dim);font-size:13px}
+  .empty{padding:40px 20px;text-align:center;color:var(--dim);font-size:14px}
+  .warn{padding:12px 16px;background:#FFFBEB;border:1px solid #F6D860;border-radius:8px;
+    font-size:13px;color:#7A5C00;margin-bottom:14px}
   @media(max-width:640px){
-    .c-name{width:120px}.c-stage{display:none}.c-state{width:92px}
-    .head .c-note,.board .c-note{display:none}
-  }
+    .c-name{width:130px}.c-stage{display:none}.c-state{width:100px}
+    .head .c-note,.board .c-note{display:none}}
 </style>
 </head>
 <body>
@@ -82,151 +78,282 @@
     <h1>PCB design status</h1>
     <div class="stamp" id="stamp">loading…</div>
   </header>
-
   <div class="kpis" id="kpis"></div>
-
+  <div id="warn"></div>
   <div class="bar">
     <input type="search" id="q" placeholder="Search a board or client">
     <span class="hint">Tap a client, then a board</span>
   </div>
-
   <div class="panel" id="panel"><div class="empty">Reading the sheet…</div></div>
 </div>
-
 <script>
-var COLOR = {Completed:'var(--ok)', 'On hold':'var(--hold)', 'In progress':'var(--wip)',
-             'Not started':'var(--idle)'};
-var STAGES = ['Upcoming','Schematic','PCB-Design','SI&PI','Assembly'];
-var DATA = null, OPEN = {}, QUERY = '';
+var PUB = '2PACX-1vRNTUdhurnjbtRHq8k52Ne2Ktbj5efyiLHuZGjF1R1MSpYz_HBHN4WWN8WXVkKc79McyavKgNjxTlaF';
+var TABS = [
+  {tab:'Schematic',           stage:'Schematic'},
+  {tab:'PCB-Design',          stage:'PCB-Design'},
+  {tab:'SI&PI Simulation',    stage:'SI&PI'},
+  {tab:'Assembly',            stage:'Assembly'},
+  {tab:"UPCOMING_BARE-PCB'S", stage:'Upcoming'}
+];
+var STAGE_ORDER = ['Upcoming','Schematic','PCB-Design','SI&PI','Assembly'];
+var COLOR = {Completed:'var(--ok)','On hold':'var(--hold)',
+             'In progress':'var(--wip)','Not started':'var(--idle)'};
+var DATA=null, OPEN={}, QUERY='', FAILED=[];
 
-function colorOf(state){
-  if (state.indexOf('Delayed') === 0) return 'var(--late)';
-  return COLOR[state] || 'var(--idle)';
+function csvUrl(t){
+  return 'https://docs.google.com/spreadsheets/d/e/'+PUB+
+         '/pub?output=csv&sheet='+encodeURIComponent(t.tab);
 }
 function esc(s){
-  return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});
+}
+function norm(v){return String(v||'').trim().toLowerCase();}
+function key(n){return norm(n).replace(/[^a-z0-9]/g,'');}
+function colorOf(s){
+  if(s.indexOf('Delayed')===0)return'var(--late)';
+  return COLOR[s]||'var(--idle)';
+}
+function toDate(v){
+  if(!v||v===''||v==='—')return null;
+  var s=String(v).trim();
+  var m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if(m)return new Date(+m[3],+m[2]-1,+m[1]);
+  m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+  var d=new Date(v);return isNaN(d)?null:d;
+}
+function today(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());}
+function fmtDate(d){
+  if(!d)return'—';
+  return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+}
+function classify(statusText,comments,pct,target){
+  var s=norm(statusText),c=norm(comments),both=s+' '+c;
+  var onHold=/\b(hold|blocked|paused|stopped)\b/.test(both);
+  var ongoing=/\b(in progress|ongoing|wip|pending)\b/.test(c);
+  var done=/\b(complete|completed|done|closed|delivered)\b/.test(s)||
+           (s===''&&pct===100&&!ongoing);
+  var delay=0;
+  if(!done&&target){var d=Math.round((today()-target)/86400000);if(d>0)delay=d;}
+  var state;
+  if(onHold)state='On hold';
+  else if(delay>0)state='Delayed '+delay+'d';
+  else if(done)state='Completed';
+  else if(pct>0||s||c)state='In progress';
+  else state='Not started';
+  return{state:state,delay:delay,completed:done,onHold:onHold};
+}
+function parseCSV(text){
+  var rows=[],cells=[],cur='',inQ=false;
+  for(var i=0;i<text.length;i++){
+    var ch=text[i];
+    if(ch==='"'){if(inQ&&text[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){cells.push(cur);cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){
+      cells.push(cur);cur='';
+      if(cells.some(function(c){return c.trim();}))rows.push(cells);
+      cells=[];if(ch==='\r'&&text[i+1]==='\n')i++;
+    }else cur+=ch;
+  }
+  if(cur||cells.length){cells.push(cur);
+    if(cells.some(function(c){return c.trim();}))rows.push(cells);}
+  return rows;
+}
+function findHeaders(rows){
+  var FIELDS={
+    project:['project','board','project name','board name'],
+    customer:['customer','client'],
+    owner:['owner','designer','engineer'],
+    manager:['project manager','manager','pm'],
+    start:['start date','start','kickoff'],
+    target:['target date','target','due date','end date'],
+    status:['status'],
+    pct:['% complete','percent complete','percentage','completion','%'],
+    comments:['comments','comment','remarks','notes']
+  };
+  for(var r=0;r<Math.min(12,rows.length);r++){
+    var cells=rows[r].map(norm);
+    if(cells.indexOf('project')===-1&&cells.indexOf('board')===-1)continue;
+    var map={};
+    Object.keys(FIELDS).forEach(function(f){
+      FIELDS[f].some(function(a){var i=cells.indexOf(a);if(i>-1){map[f]=i;return true;}});
+    });
+    return{row:r,map:map};
+  }
+  return null;
+}
+function fetchTab(t,boards,gaps){
+  return fetch(csvUrl(t)).then(function(r){
+    if(!r.ok)throw new Error(t.tab+' (HTTP '+r.status+')');
+    return r.text();
+  }).then(function(text){
+    var rows=parseCSV(text),head=findHeaders(rows);
+    if(!head||head.map.project===undefined)return;
+    for(var r=head.row+1;r<rows.length;r++){
+      var row=rows[r];
+      var get=function(f){return head.map[f]===undefined?'':row[head.map[f]]||'';};
+      var project=String(get('project')).trim();
+      if(!project)continue;
+      var pctRaw=get('pct'),pct=null;
+      if(pctRaw!==''){
+        var pm=String(pctRaw).match(/(\d+(\.\d+)?)/);
+        if(pm){pct=Math.round(+pm[1]);if(pct<=1)pct=Math.round(pct*100);}
+      }
+      var targetDate=toDate(get('target'));
+      var judged=classify(get('status'),get('comments'),pct||0,targetDate);
+      var rec={stage:t.stage,project:project,
+        customer:String(get('customer')).trim()||'Not set',
+        owner:String(get('owner')).trim()||'Not assigned',
+        manager:String(get('manager')).trim(),
+        start:fmtDate(toDate(get('start'))),target:fmtDate(targetDate),
+        statusText:String(get('status')).trim(),pct:pct,
+        comments:String(get('comments')).trim(),judged:judged};
+      var missing=[];
+      if(!targetDate)missing.push('target date');
+      if(!rec.statusText)missing.push('status');
+      if(rec.customer==='Not set')missing.push('customer');
+      if(missing.length)gaps.push(project);
+      var k=key(project);
+      if(!boards[k])boards[k]={project:project,stages:{},order:-1};
+      boards[k].stages[t.stage]=rec;
+      var ord=STAGE_ORDER.indexOf(t.stage);
+      if(ord>=boards[k].order){
+        boards[k].order=ord;boards[k].current=rec;boards[k].project=project;
+      }
+    }
+  }).catch(function(e){FAILED.push(e.message);});
+}
+function loadAll(){
+  FAILED=[];
+  var boards={},gaps=[];
+  Promise.all(TABS.map(function(t){return fetchTab(t,boards,gaps);}))
+  .then(function(){
+    var clients={},completed=0,delayed=0,onHold=0,inProgress=0;
+    Object.keys(boards).forEach(function(k){
+      var b=boards[k],c=b.current,j=c.judged;
+      if(j.onHold)onHold++;
+      else if(j.delay>0)delayed++;
+      else if(j.completed)completed++;
+      else inProgress++;
+      var board={name:b.project,stage:c.stage,state:j.state,delay:j.delay,
+        comments:c.comments,owner:c.owner,manager:c.manager,
+        start:c.start,target:c.target,pct:c.pct,
+        stages:STAGE_ORDER.filter(function(s){return b.stages[s];})};
+      if(!clients[c.customer])clients[c.customer]=[];
+      clients[c.customer].push(board);
+    });
+    var list=Object.keys(clients).map(function(name){
+      var bds=clients[name].sort(function(a,b){
+        var rank=function(x){
+          if(x.delay>0)return 0;if(x.state==='On hold')return 1;
+          if(x.state==='In progress')return 2;if(x.state==='Not started')return 3;return 4;};
+        return rank(a)-rank(b)||b.delay-a.delay;
+      });
+      return{name:name,boards:bds,
+        delayed:bds.filter(function(b){return b.delay>0;}).length,
+        done:bds.filter(function(b){return b.state==='Completed';}).length};
+    }).sort(function(a,b){return b.delayed-a.delayed||b.boards.length-a.boards.length;});
+    DATA={total:Object.keys(boards).length,completed:completed,delayed:delayed,
+      onHold:onHold,inProgress:inProgress,gaps:gaps.length,clients:list};
+    var now=new Date();
+    document.getElementById('stamp').textContent='updated '+
+      now.getDate()+'/'+(now.getMonth()+1)+' '+
+      String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    if(FAILED.length){
+      document.getElementById('warn').innerHTML=
+        '<div class="warn">Could not load: '+FAILED.map(esc).join(', ')+
+        '. Check the tab is published in File → Share → Publish to web.</div>';
+    }else{document.getElementById('warn').innerHTML='';}
+    renderKPIs();render();
   });
 }
-
-function kpis(d){
-  var cells = [['Boards tracked', d.total, 'var(--ink)'],
-               ['Completed', d.completed, 'var(--ok)'],
-               ['Delayed', d.delayed, 'var(--late)'],
-               ['On hold', d.onHold, 'var(--hold)'],
-               ['In progress', d.inProgress, 'var(--wip)'],
-               ['Fields missing', d.gaps, 'var(--dim)']];
-  document.getElementById('kpis').innerHTML = cells.map(function(c){
-    return '<div class="kpi"><span>' + c[0] + '</span><b style="color:' + c[2] + '">' + c[1] + '</b></div>';
+function renderKPIs(){
+  var cells=[['Boards tracked',DATA.total,'var(--ink)'],
+    ['Completed',DATA.completed,'var(--ok)'],['Delayed',DATA.delayed,'var(--late)'],
+    ['On hold',DATA.onHold,'var(--hold)'],['In progress',DATA.inProgress,'var(--wip)'],
+    ['Fields missing',DATA.gaps,'var(--dim)']];
+  document.getElementById('kpis').innerHTML=cells.map(function(c){
+    return'<div class="kpi"><span>'+c[0]+'</span><b style="color:'+c[2]+'">'+c[1]+'</b></div>';
   }).join('');
 }
-
-function matches(client){
-  if (!QUERY) return client.boards;
-  var q = QUERY.toLowerCase();
-  if (client.name.toLowerCase().indexOf(q) > -1) return client.boards;
-  return client.boards.filter(function(b){
-    return b.name.toLowerCase().indexOf(q) > -1 ||
-           (b.comments || '').toLowerCase().indexOf(q) > -1;
+function matches(cl){
+  if(!QUERY)return cl.boards;
+  var q=QUERY.toLowerCase();
+  if(cl.name.toLowerCase().indexOf(q)>-1)return cl.boards;
+  return cl.boards.filter(function(b){
+    return b.name.toLowerCase().indexOf(q)>-1||
+           (b.comments||'').toLowerCase().indexOf(q)>-1;
   });
 }
-
 function render(){
-  if (!DATA) return;
-  var panel = document.getElementById('panel'), html = '';
-
-  DATA.clients.forEach(function(cl, i){
-    var boards = matches(cl);
-    if (!boards.length) return;
-
-    var seen = {}, dots = '';
+  if(!DATA)return;
+  var panel=document.getElementById('panel'),html='';
+  DATA.clients.forEach(function(cl,i){
+    var boards=matches(cl);if(!boards.length)return;
+    var seen={},dots='';
     boards.forEach(function(b){
-      var c = colorOf(b.state);
-      if (!seen[c]) { seen[c] = 1; dots += '<span class="dot" style="background:' + c + '"></span>'; }
+      var c=colorOf(b.state);
+      if(!seen[c]){seen[c]=1;dots+='<span class="dot" style="background:'+c+'"></span>';}
     });
-
-    var sum = cl.delayed
-      ? '<span style="color:var(--late)">' + cl.delayed + ' delayed</span>'
-      : cl.done + ' done';
-
-    html += '<div class="client' + (OPEN[i] ? ' open' : '') + '" data-i="' + i + '">' +
-              '<span class="caret">&#9654;</span>' +
-              '<span class="cname">' + esc(cl.name) + '</span>' +
-              '<span class="dots">' + dots + '</span>' +
-              '<span class="csum">' + boards.length + ' boards &middot; ' + sum + '</span>' +
-            '</div>';
-
-    if (OPEN[i]) {
-      html += '<div class="head"><span class="c-name">Board</span>' +
-              '<span class="c-stage">Stage</span><span class="c-state">Status</span>' +
-              '<span class="c-note">Comments</span></div>';
-      boards.forEach(function(b, j){
-        var c = colorOf(b.state);
-        html += '<div class="board" data-i="' + i + '" data-j="' + j + '">' +
-                  '<span class="c-name">' + esc(b.name) + '</span>' +
-                  '<span class="c-stage">' + esc(b.stage) + '</span>' +
-                  '<span class="c-state"><span class="tag" style="background:' + c +
-                    '1F;color:' + c + '">' + esc(b.state) + '</span></span>' +
-                  '<span class="c-note">' + esc(b.comments || '—') + '</span>' +
-                '</div>' +
-                '<div id="d' + i + '-' + j + '"></div>';
+    var sum=cl.delayed
+      ?'<span style="color:var(--late)">'+cl.delayed+' delayed</span>'
+      :cl.done+' done';
+    html+='<div class="client'+(OPEN[i]?' open':'')+'" data-i="'+i+'">'+
+      '<span class="caret">&#9654;</span>'+
+      '<span class="cname">'+esc(cl.name)+'</span>'+
+      '<span class="dots">'+dots+'</span>'+
+      '<span class="csum">'+boards.length+' boards &middot; '+sum+'</span></div>';
+    if(OPEN[i]){
+      html+='<div class="head"><span class="c-name">Board</span>'+
+        '<span class="c-stage">Stage</span><span class="c-state">Status</span>'+
+        '<span class="c-note">Comments</span></div>';
+      boards.forEach(function(b,j){
+        var c=colorOf(b.state);
+        html+='<div class="board" data-i="'+i+'" data-j="'+j+'">'+
+          '<span class="c-name">'+esc(b.name)+'</span>'+
+          '<span class="c-stage">'+esc(b.stage)+'</span>'+
+          '<span class="c-state"><span class="tag" style="background:'+c+'1F;color:'+c+'">'+
+            esc(b.state)+'</span></span>'+
+          '<span class="c-note">'+esc(b.comments||'—')+'</span></div>'+
+          '<div id="d'+i+'-'+j+'"></div>';
       });
     }
   });
-
-  panel.innerHTML = html || '<div class="empty">Nothing matches that search.</div>';
-
+  panel.innerHTML=html||'<div class="empty">Nothing matches that search.</div>';
   panel.querySelectorAll('.client').forEach(function(el){
-    el.onclick = function(){ var i = el.dataset.i; OPEN[i] = !OPEN[i]; render(); };
+    el.onclick=function(){var i=el.dataset.i;OPEN[i]=!OPEN[i];render();};
   });
-
   panel.querySelectorAll('.board').forEach(function(el){
-    el.onclick = function(){
-      var i = el.dataset.i, j = el.dataset.j;
-      var slot = document.getElementById('d' + i + '-' + j);
-      if (slot.innerHTML) { slot.innerHTML = ''; return; }
-      var b = matches(DATA.clients[i])[j], c = colorOf(b.state);
-      var rail = STAGES.map(function(s){
-        return '<span class="step' + (b.stages.indexOf(s) > -1 ? ' hit' : '') + '">' + s + '</span>';
+    el.onclick=function(){
+      var i=el.dataset.i,j=el.dataset.j;
+      var slot=document.getElementById('d'+i+'-'+j);
+      if(slot.innerHTML){slot.innerHTML='';return;}
+      var b=matches(DATA.clients[i])[j],c=colorOf(b.state);
+      var rail=STAGE_ORDER.map(function(s){
+        return'<span class="step'+(b.stages.indexOf(s)>-1?' hit':'')+'">'+ s+'</span>';
       }).join('');
-      slot.className = 'detail';
-      slot.innerHTML =
-        '<span class="dk">Stage</span><span>' + esc(b.stage) + '</span>' +
-        '<span class="dk">Status</span><span style="color:' + c + ';font-weight:600">' +
-          esc(b.state) + (b.delay > 0 ? ' — past target of ' + esc(b.target) : '') + '</span>' +
-        '<span class="dk">Comments</span><span>' + esc(b.comments || 'None entered') + '</span>' +
-        '<span class="dk">Owner</span><span>' + esc(b.owner) + '</span>' +
-        '<span class="dk">Manager</span><span>' + esc(b.manager || '—') + '</span>' +
-        '<span class="dk">Start</span><span>' + esc(b.start || '—') + '</span>' +
-        '<span class="dk">Target</span><span>' + esc(b.target || 'not set') + '</span>' +
-        '<span class="dk">Progress</span><span>' + (b.pct === null ? '—' : b.pct + '%') + '</span>' +
-        '<span class="dk">On file in</span><span class="rail">' + rail + '</span>';
+      slot.className='detail';
+      slot.innerHTML=
+        '<span class="dk">Stage</span><span>'+esc(b.stage)+'</span>'+
+        '<span class="dk">Status</span><span style="color:'+c+';font-weight:600">'+
+          esc(b.state)+(b.delay>0?' — past target of '+esc(b.target):'')+
+        '</span>'+
+        '<span class="dk">Comments</span><span>'+esc(b.comments||'None entered')+'</span>'+
+        '<span class="dk">Owner</span><span>'+esc(b.owner)+'</span>'+
+        '<span class="dk">Manager</span><span>'+esc(b.manager||'—')+'</span>'+
+        '<span class="dk">Start</span><span>'+esc(b.start||'—')+'</span>'+
+        '<span class="dk">Target</span><span>'+esc(b.target||'not set')+'</span>'+
+        '<span class="dk">Progress</span><span>'+(b.pct===null?'—':b.pct+'%')+'</span>'+
+        '<span class="dk">On file in</span><span class="rail">'+rail+'</span>';
     };
   });
 }
-
-function load(){
-  google.script.run
-    .withSuccessHandler(function(d){
-      DATA = d;
-      document.getElementById('stamp').textContent = 'updated ' + d.refreshed;
-      kpis(d);
-      render();
-    })
-    .withFailureHandler(function(err){
-      document.getElementById('panel').innerHTML =
-        '<div class="empty">Couldn\'t read the sheet: ' + esc(err.message) + '</div>';
-    })
-    .getDashboardData();
-}
-
-document.getElementById('q').addEventListener('input', function(e){
-  QUERY = e.target.value.trim();
-  render();
+document.getElementById('q').addEventListener('input',function(e){
+  QUERY=e.target.value.trim();render();
 });
-
-load();
-setInterval(load, 60000);
+loadAll();
+setInterval(loadAll,60000);
 </script>
 </body>
 </html>
